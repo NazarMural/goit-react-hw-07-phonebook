@@ -1,11 +1,21 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { List, Item, ItemText, Button, Input, Title } from './Contacts.styled';
+import { useSelector, useDispatch } from 'react-redux';
+import { deleteContact } from 'redux/contactsSlice';
+import { setFilter } from 'redux/filterSlice';
 
-const Contacts = ({ contacts, filter, handleChange, deleteContact }) => {
+const Contacts = () => {
+  const contacts = useSelector(state => state.contacts.contacts);
+  const filter = useSelector(state => state.filter.filter);
+  const dispatch = useDispatch();
+
   const filteredContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
+
+  const changeFilter = e => {
+    dispatch(setFilter(e.currentTarget.value));
+  };
 
   return (
     <>
@@ -17,7 +27,7 @@ const Contacts = ({ contacts, filter, handleChange, deleteContact }) => {
         pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
         title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
         required
-        onChange={handleChange}
+        onChange={changeFilter}
       />
       <List>
         {filter !== ''
@@ -26,7 +36,9 @@ const Contacts = ({ contacts, filter, handleChange, deleteContact }) => {
                 <ItemText>
                   {name}: {number}
                 </ItemText>
-                <Button onClick={() => deleteContact(id)}>Delete</Button>
+                <Button onClick={() => dispatch(deleteContact(id))}>
+                  Delete
+                </Button>
               </Item>
             ))
           : contacts.map(({ id, name, number }) => (
@@ -34,7 +46,9 @@ const Contacts = ({ contacts, filter, handleChange, deleteContact }) => {
                 <ItemText>
                   {name}: {number}
                 </ItemText>
-                <Button onClick={() => deleteContact(id)}>Delete</Button>
+                <Button onClick={() => dispatch(deleteContact(id))}>
+                  Delete
+                </Button>
               </Item>
             ))}
       </List>
@@ -43,16 +57,3 @@ const Contacts = ({ contacts, filter, handleChange, deleteContact }) => {
 };
 
 export default Contacts;
-
-Contacts.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.exact({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-  filter: PropTypes.string.isRequired,
-  handleChange: PropTypes.func.isRequired,
-  deleteContact: PropTypes.func.isRequired,
-};
