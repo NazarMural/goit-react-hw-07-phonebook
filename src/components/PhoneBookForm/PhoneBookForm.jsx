@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { nanoid } from 'nanoid';
 import { Button, ButtonBox, Form, Input, Label } from './PhoneBookForm.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { setContact } from 'redux/contactsSlice';
+import { addContact } from 'redux/operations';
+import { getContacts } from 'redux/selectors';
 
 export default function PhoneBookForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  const contacts = useSelector(state => state.contacts.contacts);
+  const contacts = useSelector(getContacts);
   const dispatch = useDispatch();
 
   const handleSubmit = e => {
@@ -20,7 +21,7 @@ export default function PhoneBookForm() {
     }
 
     const newContact = { id: nanoid(), name, number };
-    dispatch(setContact(newContact));
+    dispatch(addContact(newContact));
     reset();
   };
 

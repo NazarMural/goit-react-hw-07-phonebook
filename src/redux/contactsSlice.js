@@ -1,26 +1,62 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, isAnyOf } from '@reduxjs/toolkit';
+import { addContact, deleteContact, fetchContacts } from './operations';
 
-const initialState = {
-  contacts: [],
+const handlePending = state => {
+  state.isLoading = true;
+};
+const handleFulfilledGet = (state, action) => {
+  state.isLoading = false;
+  state.items.push(...action.payload);
+  state.error = '';
+};
+const handleFulfilledCreate = (state, action) => {
+  state.isLoading = false;
+  state.items.push(action.payload);
+  state.error = '';
+};
+const handleFulfilledDelete = (state, action) => {
+  state.isLoading = false;
+  state.items = state.items.filter(item => item.id !== action.payload.id);
+  state.error = '';
+};
+const handleRejected = (state, action) => {
+  state.isLoading = false;
+  state.error = action.payload;
 };
 
-export const contantsSlice = createSlice({
-  name: 'counter',
+const initialState = {
+  items: [],
+  isLoading: false,
+  error: null,
+};
+
+// { id: 1, name: 'Nazar', number: '123456' }
+
+export const contactsSlice = createSlice({
+  name: 'phonebook',
   initialState,
-  reducers: {
-    setContact(state, action) {
-      state.contacts.push(action.payload);
-    },
-    deleteContact(state, action) {
-      const index = state.contacts.findIndex(
-        contact => contact.id === action.payload
+  extraReducers: builder => {
+    builder
+      .addCase(fetchContacts.fulfilled, handleFulfilledGet)
+      .addCase(addContact.fulfilled, handleFulfilledCreate)
+      .addCase(deleteContact.fulfilled, handleFulfilledDelete)
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.pending,
+          addContact.pending,
+          deleteContact.pending
+        ),
+        handlePending
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.rejected,
+          addContact.rejected,
+          deleteContact.rejected
+        ),
+        handleRejected
       );
-      state.contacts.splice(index, 1);
-    },
   },
 });
 
-// Action creators are generated for each case reducer function
-export const { setContact, deleteContact } = contantsSlice.actions;
-
-export default contantsSlice.reducer;
+export default contactsSlice.reducer;
